@@ -1,0 +1,34 @@
+{{- if .Values.storage.enabled }}
+{{- range .Values.storage.storageClasses }}
+{{- $storageClass := . -}}
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ $storageClass.name}}
+  labels:
+    {{- include "es-storage.labels" $ | nindent 4 }}
+{{- if $storageClass.labels }}
+{{ toYaml $storageClass.labels | indent 4 }}
+{{- end }}
+  annotations:
+{{- if $storageClass.annotations }}
+{{ toYaml $storageClass.annotations | indent 4 }}
+{{- end }}
+provisioner: {{ $storageClass.provisioner | quote }}
+parameters:
+{{ toYaml $storageClass.parameters | indent 4 }}
+volumeBindingMode: {{ $storageClass.volumeBindingMode}}
+mountOptions:
+{{- range $storageClass.mountOptions }}
+  - {{ . | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+
+
+
+
+  

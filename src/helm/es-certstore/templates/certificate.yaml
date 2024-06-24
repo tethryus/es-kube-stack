@@ -1,0 +1,31 @@
+{{- if .Values.certificates.enabled }}
+{{- range .Values.certificates.certificates }}
+{{- $cert := . -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+{{- if $cert.fullnameOverride }}
+  name: {{ $cert.fullnameOverride }}
+{{- else }}
+  name: {{ template "es-certstore.fullname" $ }}-{{ $cert.name }}
+{{- end }}
+spec:
+{{- if $cert.fullnameOverride }}
+  secretName: {{ $cert.fullnameOverride }}
+{{- else }}
+  secretName: {{ template "es-certstore.fullname" $ }}-{{ $cert.name }}
+{{- end }}
+  {{- if $cert.secretTemplate }}
+  secretTemplate:
+    {{ toYaml $cert.secretTemplate | nindent 4 }}
+  {{- end }}
+  issuerRef:
+    name: {{ template "es-certstore.fullname" $ }}
+    kind: ClusterIssuer
+  dnsNames:
+  {{- range $cert.dns }}
+    - {{ . | quote }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}

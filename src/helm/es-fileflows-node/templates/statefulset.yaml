@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "es-fileflows-node.fullname" . }}
+  labels:
+    {{- include "es-fileflows-node.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ template "es-fileflows-node.fullname" . }}-headless
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  updateStrategy:
+    type: {{ .Values.updateStrategyType }}
+    {{- if (eq "OnDelete" .Values.updateStrategyType) }}
+    rollingUpdate: null
+    {{- end }}
+  selector:
+    matchLabels:
+      {{- include "es-fileflows-node.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "es-fileflows-node.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "es-fileflows-node.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TZ
+              value: {{ .Values.config.timezone | quote }}
+            - name: NodeName
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- range .Values.additionalEnv }}
+            - name: {{ .name }}
+              value: {{ tpl .value $ | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: configs
+              mountPath: /app/Data
+            - name: temp
+              mountPath: /temp
+            - name: media
+              mountPath: /media
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: configs
+      {{- if .Values.persistence.configs.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.configs.existingClaim }}
+          claimName: {{ .Values.persistence.configs.existingClaim }}
+          {{- else }}
+          claimName: {{ template "es-fileflows-node.fullname" . }}-configs
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: temp
+      {{- if .Values.persistence.temp.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.temp.existingClaim }}
+          claimName: {{ .Values.persistence.temp.existingClaim }}
+          {{- else }}
+          claimName: {{ template "es-fileflows-node.fullname" . }}-temp
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: media
+      {{- if .Values.persistence.media.enabled }}
+        persistentVolumeClaim:
+          {{- if .Values.persistence.media.existingClaim }}
+          claimName: {{ .Values.persistence.media.existingClaim }}
+          {{- else }}
+          claimName: {{ template "es-fileflows-node.fullname" . }}-media
+          {{- end -}}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}

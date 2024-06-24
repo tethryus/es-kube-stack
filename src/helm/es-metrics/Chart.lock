@@ -1,0 +1,9 @@
+dependencies:
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 55.11.0
+- name: metrics-server
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.7.1
+digest: sha256:156735c5ea1405df05ec377d96aaf4e1010f8b4a821915f3cffa349c7594513f
+generated: "2024-01-18T18:10:02.8745069+02:00"
