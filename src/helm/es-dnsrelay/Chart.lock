@@ -1,24 +1,9 @@
 dependencies:
 - name: external-dns
   repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
+  version: 9.0.3
 - name: external-dns
   repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-- name: external-dns
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-- name: external-dns
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-- name: external-dns
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-- name: external-dns
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-- name: external-dns
-  repository: https://charts.bitnami.com/bitnami
-  version: 9.0.0
-digest: sha256:bb8e8c02c25be7990599fabedbaf2b0b5dafa40c88f0074eae469bcce6f28bcd
-generated: "2025-08-03T07:28:27.928416861Z"
+  version: 9.0.3
+digest: sha256:c39136178d0a005b56b9b110c93e886f9a51ceb700b07da319fc0049861a3404
+generated: "2025-09-10T09:25:07.4362796+03:00"
